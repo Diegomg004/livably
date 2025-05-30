@@ -1297,9 +1297,24 @@ export default function App() {
     climate: "All",
   });
 
+  // Estado para detectar ancho ventana y adaptar diseño
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const onMarkerClick = useCallback((city) => {
     setSelectedCity(city);
   }, []);
+
+  // Suponiendo que tienes estas variables:
+  // cities: array de ciudades
+  // cityData: objeto con datos de las ciudades
 
   const filteredCities = cities.filter(({ name }) => {
     const data = cityData[name];
@@ -1320,200 +1335,237 @@ export default function App() {
     <div
       style={{
         display: "flex",
+        flexDirection: isMobile ? "column" : "row",
         height: "100vh",
         fontFamily: "Segoe UI, sans-serif",
         backgroundColor: "#fafafa",
         color: "#333",
       }}
-      
     >
-{/* Panel lateral */}
-<div
-  style={{
-    width: "380px",
-    backgroundColor: "#fdfcfb",
-    boxShadow: "2px 0 10px rgba(0, 0, 0, 0.1)",
-    overflowY: "auto",
-    padding: "24px",
-    fontFamily: "Arial, sans-serif",
-    borderRadius: "0 10px 10px 0",
-  }}
->
-  <h2 style={{ textAlign: "center", color: "#6a1b9a", fontSize: "28px", marginBottom: "20px" }}>
-    LIVABLY
-  </h2>
-
-  {/* Selección de ciudad de origen */}
-  <div style={{ marginBottom: "24px" }}>
-    <label htmlFor="origin" style={{ fontWeight: "bold", display: "block", marginBottom: "6px" }}>
-      Ciudad de Origen:
-    </label>
-    <select
-      id="origin"
-      value={originCity}
-      onChange={(e) => setOriginCity(e.target.value)}
-      style={{
-        width: "100%",
-        padding: "10px",
-        borderRadius: "8px",
-        border: "1px solid #ccc",
-        fontSize: "15px",
-      }}
-    >
-      {cities.map(({ name }) => (
-        <option key={name} value={name}>
-          {name}
-        </option>
-      ))}
-    </select>
-  </div>
-
-{/* Filtros */}
-<div style={{ marginBottom: "24px" }}>
-  <h4 style={{ color: "#333", fontSize: "18px", marginBottom: "12px" }}>Filtros:</h4>
-  
-  {[
-    {
-      label: "Costo de vida",
-      key: "costOfLiving",
-      options: [
-        { value: "All", label: "Todos" },
-        { value: "Low", label: "Bajo" },
-        { value: "Moderate", label: "Moderado" },
-        { value: "High", label: "Alto" },
-        { value: "Very High", label: "Muy alto" },
-      ],
-    },
-    {
-      label: "Seguridad",
-      key: "safety",
-      options: [
-        { value: "All", label: "Todas" },
-        { value: "Low", label: "Baja" },
-        { value: "Moderate", label: "Moderada" },
-        { value: "High", label: "Alta" },
-        { value: "Very High", label: "Muy alta" },
-      ],
-    },
-    {
-      label: "Clima",
-      key: "climate",
-      options: [
-        { value: "All", label: "Todos" },
-        { value: "Warm", label: "Cálido (> 20°C)" },
-        { value: "Cold", label: "Frío (< 15°C)" },
-      ],
-    },
-  ].map(({ label, key, options }) => (
-    <div key={key} style={{ marginTop: "10px" }}>
-      <label style={{ display: "block", fontWeight: "600", marginBottom: "6px" }}>
-        {label}:
-      </label>
-      <select
-        value={filters[key]}
-        onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
+      {/* Panel lateral */}
+      <div
         style={{
-          width: "100%",
-          padding: "8px",
-          borderRadius: "8px",
-          border: "1px solid #ccc",
-          fontSize: "14px",
-          color: "#333",
-          backgroundColor: "#fff",
-          cursor: "pointer",
+          width: isMobile ? "100%" : "380px",
+          height: isMobile ? "auto" : "100vh",
+          backgroundColor: "#fdfcfb",
+          boxShadow: isMobile
+            ? "0 2px 10px rgba(0, 0, 0, 0.1)"
+            : "2px 0 10px rgba(0, 0, 0, 0.1)",
+          overflowY: "auto",
+          padding: "24px",
+          fontFamily: "Arial, sans-serif",
+          borderRadius: isMobile ? "0 0 10px 10px" : "0 10px 10px 0",
+          flexShrink: 0,
         }}
       >
-        {options.map(({ value, label }, idx) => (
-          <option key={idx} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
-    </div>
-  ))}
-</div>
+        <h2
+          style={{
+            textAlign: "center",
+            color: "#6a1b9a",
+            fontSize: "28px",
+            marginBottom: "20px",
+          }}
+        >
+          LIVABLY
+        </h2>
 
-
-  {/* Información de la ciudad seleccionada */}
-  {selectedCity && cityData[selectedCity] && (
-    <div style={{ marginTop: "10px" }}>
-      <h3 style={{ color: "#4e342e", fontSize: "22px" }}>{selectedCity}</h3>
-      <img
-        src={cityData[selectedCity].photo}
-        alt={selectedCity}
-        style={{ width: "100%", borderRadius: "12px", marginBottom: "14px" }}
-      />
-      {[
-        ["Temperatura", "temp"],
-        ["Horas de sol", "sunHours"],
-        ["Hoteles", "hotels"],
-        ["Alquileres", "rentals"],
-        ["Salud", "medical"],
-        ["Seguridad", "safety"],
-        ["Costo de vida", "costOfLiving"],
-        ["Calidad de vida", "qualityOfLife"],
-        ["Transporte", "transport"],
-      ].map(([label, key]) => (
-        <p key={key}>
-          <strong>{label}:</strong> {cityData[selectedCity][key]}
-        </p>
-      ))}
-      <p>
-        <strong>Idiomas:</strong> {cityData[selectedCity].languages.join(", ")}
-      </p>
-      <p>
-        <strong>Atracciones:</strong> {cityData[selectedCity].attractions.join(", ")}
-      </p>
-      <p>
-        <strong>Festivales:</strong> {cityData[selectedCity].festivals.join(", ")}
-      </p>
-
-      {/* Tabla comparativa */}
-      {originCity && cityData[originCity] && originCity !== selectedCity && (
-        <>
-          <hr style={{ margin: "20px 0" }} />
-          <h4 style={{ marginBottom: "10px" }}>
-            Comparación con <span style={{ color: "#6a1b9a" }}>{originCity}</span>:
-          </h4>
-          <table
+        {/* Selección de ciudad de origen */}
+        <div style={{ marginBottom: "24px" }}>
+          <label
+            htmlFor="origin"
+            style={{ fontWeight: "bold", display: "block", marginBottom: "6px" }}
+          >
+            Ciudad de Origen:
+          </label>
+          <select
+            id="origin"
+            value={originCity}
+            onChange={(e) => setOriginCity(e.target.value)}
             style={{
               width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "14px",
+              padding: "10px",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+              fontSize: "15px",
             }}
           >
-            <thead>
-              <tr style={{ backgroundColor: "#f3e5f5" }}>
-                <th style={{ border: "1px solid #ddd", padding: "8px" }}></th>
-                <th style={{ border: "1px solid #ddd", padding: "8px" }}>{selectedCity}</th>
-                <th style={{ border: "1px solid #ddd", padding: "8px" }}>{originCity}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ["Temperatura", "temp"],
-                ["Horas de sol", "sunHours"],
-                ["Costo de vida", "costOfLiving"],
-                ["Seguridad", "safety"],
-                ["Transporte", "transport"],
-              ].map(([label, key]) => (
-                <tr key={key}>
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}><strong>{label}</strong></td>
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{cityData[selectedCity][key]}</td>
-                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{cityData[originCity][key]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
-    </div>
-  )}
-</div>
+            {cities.map(({ name }) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
 
+        {/* Filtros */}
+        <div style={{ marginBottom: "24px" }}>
+          <h4
+            style={{ color: "#333", fontSize: "18px", marginBottom: "12px" }}
+          >
+            Filtros:
+          </h4>
+
+          {[
+            {
+              label: "Costo de vida",
+              key: "costOfLiving",
+              options: [
+                { value: "All", label: "Todos" },
+                { value: "Low", label: "Bajo" },
+                { value: "Moderate", label: "Moderado" },
+                { value: "High", label: "Alto" },
+                { value: "Very High", label: "Muy alto" },
+              ],
+            },
+            {
+              label: "Seguridad",
+              key: "safety",
+              options: [
+                { value: "All", label: "Todas" },
+                { value: "Low", label: "Baja" },
+                { value: "Moderate", label: "Moderada" },
+                { value: "High", label: "Alta" },
+                { value: "Very High", label: "Muy alta" },
+              ],
+            },
+            {
+              label: "Clima",
+              key: "climate",
+              options: [
+                { value: "All", label: "Todos" },
+                { value: "Warm", label: "Cálido (> 20°C)" },
+                { value: "Cold", label: "Frío (< 15°C)" },
+              ],
+            },
+          ].map(({ label, key, options }) => (
+            <div key={key} style={{ marginTop: "10px" }}>
+              <label
+                style={{ display: "block", fontWeight: "600", marginBottom: "6px" }}
+              >
+                {label}:
+              </label>
+              <select
+                value={filters[key]}
+                onChange={(e) =>
+                  setFilters({ ...filters, [key]: e.target.value })
+                }
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                  fontSize: "14px",
+                  color: "#333",
+                  backgroundColor: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                {options.map(({ value, label }, idx) => (
+                  <option key={idx} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
+        </div>
+
+        {/* Información ciudad seleccionada */}
+        {selectedCity && cityData[selectedCity] && (
+          <div style={{ marginTop: "10px" }}>
+            <h3 style={{ color: "#4e342e", fontSize: "22px" }}>{selectedCity}</h3>
+            <img
+              src={cityData[selectedCity].photo}
+              alt={selectedCity}
+              style={{ width: "100%", borderRadius: "12px", marginBottom: "14px" }}
+            />
+            {[
+              ["Temperatura", "temp"],
+              ["Horas de sol", "sunHours"],
+              ["Hoteles", "hotels"],
+              ["Alquileres", "rentals"],
+              ["Salud", "medical"],
+              ["Seguridad", "safety"],
+              ["Costo de vida", "costOfLiving"],
+              ["Calidad de vida", "qualityOfLife"],
+              ["Transporte", "transport"],
+            ].map(([label, key]) => (
+              <p key={key}>
+                <strong>{label}:</strong> {cityData[selectedCity][key]}
+              </p>
+            ))}
+            <p>
+              <strong>Idiomas:</strong> {cityData[selectedCity].languages.join(", ")}
+            </p>
+            <p>
+              <strong>Atracciones:</strong> {cityData[selectedCity].attractions.join(", ")}
+            </p>
+            <p>
+              <strong>Festivales:</strong> {cityData[selectedCity].festivals.join(", ")}
+            </p>
+
+            {/* Tabla comparativa */}
+            {originCity && cityData[originCity] && originCity !== selectedCity && (
+              <>
+                <hr style={{ margin: "20px 0" }} />
+                <h4 style={{ marginBottom: "10px" }}>
+                  Comparación con <span style={{ color: "#6a1b9a" }}>{originCity}</span>:
+                </h4>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "14px",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ backgroundColor: "#f3e5f5" }}>
+                      <th style={{ border: "1px solid #ddd", padding: "8px" }}></th>
+                      <th style={{ border: "1px solid #ddd", padding: "8px" }}>
+                        {selectedCity}
+                      </th>
+                      <th style={{ border: "1px solid #ddd", padding: "8px" }}>
+                        {originCity}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      ["Temperatura", "temp"],
+                      ["Horas de sol", "sunHours"],
+                      ["Costo de vida", "costOfLiving"],
+                      ["Seguridad", "safety"],
+                      ["Transporte", "transport"],
+                    ].map(([label, key]) => (
+                      <tr key={key}>
+                        <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                          <strong>{label}</strong>
+                        </td>
+                        <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                          {cityData[selectedCity][key]}
+                        </td>
+                        <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                          {cityData[originCity][key]}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Globo 3D */}
-      <div style={{ flex: 1 }}>
+      <div
+        style={{
+          flex: 1,
+          width: isMobile ? "100%" : `calc(100vw - 380px)`,
+          height: isMobile ? "50vh" : "100vh",
+          minHeight: isMobile ? "300px" : "auto",
+        }}
+      >
         <Globe
           globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
           backgroundColor="#000"
@@ -1525,10 +1577,10 @@ export default function App() {
           pointLng={(d) => d.lng}
           pointColor={() => "#ff8000"}
           pointAltitude={0.01}
-          pointRadius={0.40}
+          pointRadius={0.4}
           onPointClick={(city) => onMarkerClick(city.name)}
-          width={window.innerWidth - 360}
-          height={window.innerHeight}
+          width={isMobile ? window.innerWidth : window.innerWidth - 380}
+          height={isMobile ? window.innerHeight * 0.5 : window.innerHeight}
         />
       </div>
     </div>
