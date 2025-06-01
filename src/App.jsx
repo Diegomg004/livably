@@ -1298,7 +1298,7 @@ export default function App() {
   });
 
   // Estado para detectar ancho ventana y adaptar diseño
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1200);
 
   useEffect(() => {
     const handleResize = () => {
@@ -1311,10 +1311,6 @@ export default function App() {
   const onMarkerClick = useCallback((city) => {
     setSelectedCity(city);
   }, []);
-
-  // Suponiendo que tienes estas variables:
-  // cities: array de ciudades
-  // cityData: objeto con datos de las ciudades
 
   const filteredCities = cities.filter(({ name }) => {
     const data = cityData[name];
