@@ -1,1585 +1,322 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Globe from "react-globe.gl";
+import { motion, AnimatePresence } from "framer-motion";
+import { RotateCcw } from "lucide-react";
 
 const cities = [
-  { name: "Dubai", lat: 25.276987, lng: 55.296249 },
-  { name: "Singapore", lat: 1.3521, lng: 103.8198 },
-  { name: "Toronto", lat: 43.65107, lng: -79.347015 },
-  { name: "Buenos Aires", lat: -34.603722, lng: -58.381592 },
-  { name: "Rome", lat: 41.9028, lng: 12.4964 },
-  { name: "Amsterdam", lat: 52.3676, lng: 4.9041 },
-  { name: "Cape Town", lat: -33.9249, lng: 18.4241 },
-  { name: "Bangkok", lat: 13.7563, lng: 100.5018 },
-  { name: "Barcelona", lat: 41.3851, lng: 2.1734 },
-  { name: "San Francisco", lat: 37.7749, lng: -122.4194 },
-  { name: "New York", lat: 40.7128, lng: -74.0060 },
-  { name: "London", lat: 51.5072, lng: -0.1276 },
-  { name: "Melbourne", lat: -37.8136, lng: 144.9631 },
-  { name: "Vienna", lat: 48.2082, lng: 16.3738 },
-  { name: "Tokyo", lat: 35.6895, lng: 139.6917 },
-  { name: "Prague", lat: 50.0755, lng: 14.4378 },
-  { name: "Munich", lat: 48.1351, lng: 11.5820 },
-  { name: "San Diego", lat: 32.7157, lng: -117.1611 },
-  { name: "Paris", lat: 48.8566, lng: 2.3522 },
-  { name: "Berlin", lat: 52.52, lng: 13.405 },
-  { name: "Lisbon", lat: 38.7169, lng: -9.1399 },
-  { name: "Istanbul", lat: 41.0082, lng: 28.9784 },
-  { name: "Seoul", lat: 37.5665, lng: 126.978 },
-  { name: "Osaka", lat: 34.6937, lng: 135.5023 },
-  { name: "Los Angeles", lat: 34.0522, lng: -118.2437 },
-  { name: "Chicago", lat: 41.8781, lng: -87.6298 },
-  { name: "Sydney", lat: -33.8688, lng: 151.2093 },
-  { name: "Mexico City", lat: 19.4326, lng: -99.1332 },
-  { name: "Lima", lat: -12.0464, lng: -77.0428 },
-  { name: "Santiago", lat: -33.4489, lng: -70.6693 },
-  { name: "Bogotá", lat: 4.711, lng: -74.0721 },
-  { name: "Copenhagen", lat: 55.6761, lng: 12.5683 },
-  { name: "Helsinki", lat: 60.1695, lng: 24.9354 },
-  { name: "Reykjavik", lat: 64.1466, lng: -21.9426 },
-  { name: "Oslo", lat: 59.9139, lng: 10.7522 },
-  { name: "Stockholm", lat: 59.3293, lng: 18.0686 },
-  { name: "Brussels", lat: 50.8503, lng: 4.3517 },
-  { name: "Athens", lat: 37.9838, lng: 23.7275 },
-  { name: "Warsaw", lat: 52.2297, lng: 21.0122 },
-  { name: "Budapest", lat: 47.4979, lng: 19.0402 },
-  { name: "Kuala Lumpur", lat: 3.139, lng: 101.6869 },
-  { name: "Jakarta", lat: -6.2088, lng: 106.8456 },
-  { name: "Manila", lat: 14.5995, lng: 120.9842 },
-  { name: "Ho Chi Minh City", lat: 10.8231, lng: 106.6297 },
-  { name: "Hanoi", lat: 21.0285, lng: 105.8542 },
-  { name: "Doha", lat: 25.276987, lng: 51.520008 },
-  { name: "Riyadh", lat: 24.7136, lng: 46.6753 },
-  { name: "Tel Aviv", lat: 32.0853, lng: 34.7818 },
-  { name: "Cairo", lat: 30.0444, lng: 31.2357 },
-  { name: "Nairobi", lat: -1.2921, lng: 36.8219 },
-  { name: "Johannesburg", lat: -26.2041, lng: 28.0473 },
-  { name: "Venice", lat: 45.4408, lng: 12.3155 }, 
-  { name: "Florence", lat: 43.7696, lng: 11.2558 }, 
-  { name: "Kyoto", lat: 35.0116, lng: 135.7681 }, 
-  { name: "Rio de Janeiro", lat: -22.9068, lng: -43.1729 }, 
-  { name: "Marrakech", lat: 31.6295, lng: -7.9811 }, 
-  { name: "Siem Reap", lat: 13.3644, lng: 103.8698 }, 
-  { name: "Dubrovnik", lat: 42.6507, lng: 18.0906 },
-  { name: "Edinburgh", lat: 55.9533, lng: -3.1883 }, 
-  { name: "Québec City", lat: 46.8139, lng: -71.2080 }, 
-  { name: "Jerusalem", lat: 31.7683, lng: 35.2137 },
-  { name: "Amman", lat: 31.9539, lng: 35.9106 }, 
-  { name: "Beirut", lat: 33.8938, lng: 35.5018 }, 
-  { name: "Abu Dhabi", lat: 24.4539, lng: 54.3773 }, 
-  { name: "Muscat", lat: 23.5859, lng: 58.6033 }, 
-  { name: "Durban", lat: -29.8587, lng: 31.0218 }, 
-  { name: "Casablanca", lat: 33.5731, lng: -7.5898 }, 
-  { name: "Tunis", lat: 36.8065, lng: 10.1815 }, 
-  { name: "Algiers", lat: 36.7372, lng: 3.0865 }, 
-  { name: "Tripoli", lat: 32.8872, lng: 13.1913 }, 
-  { name: "Khartoum", lat: 15.5007, lng: 32.5599 }, 
-  { name: "Addis Ababa", lat: 9.0054, lng: 38.7636 }, 
-  { name: "Accra", lat: 5.6037, lng: -0.1870 }, 
-  { name: "Lagos", lat: 6.5244, lng: 3.3792 }, 
-  { name: "Dakar", lat: 14.6928, lng: -17.4468 }, 
-  { name: "Abidjan", lat: 5.3453, lng: -4.0279 },
-  { name: "Douala", lat: 4.0511, lng: 9.7679 }, 
-  { name: "Kinshasa", lat: -4.4419, lng: 15.2663 }, 
-  { name: "Luanda", lat: -8.8383, lng: 13.2344 }, 
-  { name: "Harare", lat: -17.8252, lng: 31.0556 },
+  { name: "Madrid" },
+  { name: "Barcelona" },
+  { name: "Ciudad de México" },
+  { name: "Buenos Aires" },
+  { name: "Lima" },
+  { name: "Santiago" },
+  { name: "Bogotá" },
+  { name: "Miami" },
 ];
 
+const mockStats = {
+  population: "1.5M",
+  avgRent: "$750",
+  safety: "High",
+  climate: "Temperate",
+  healthcare: "Good",
+  education: "High quality",
+  transport: "Efficient",
+  expatCommunity: "Active",
+  nightlife: "Vibrant",
+  internet: "200 Mbps",
+  costOfLiving: "Moderate",
+  airQuality: "Good",
+  greenSpaces: "Plenty",
+  walkability: "Excellent",
+  jobMarket: "Growing",
+  taxes: "Reasonable",
+  noiseLevel: "Low",
+  traffic: "Moderate",
+  weatherConsistency: "Stable",
+};
 
-const cityData = {
-  Dubai: {
-    photo: "https://images.unsplash.com/photo-1551608935-715b138e68e4?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€200 - €500+",
-    rentals: "€1500 - €4000+",
-    medical: "Good",
-    temp: "28°C avg",
-    sunHours: "10 hrs/day",
-    festivals: ["Dubai Shopping Festival", "Dubai Food Festival"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "High",
-    costOfLiving: "High",
-    languages: ["Arabic", "English"],
-    attractions: ["Burj Khalifa", "Palm Jumeirah", "Dubai Mall"],
-  },
-  Singapore: {
-    photo: "https://images.unsplash.com/photo-1542385157-5b682390b171?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€180 - €400",
-    rentals: "€1200 - €2500",
-    medical: "Excellent",
-    temp: "27°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Chinese New Year", "National Day"],
-    qualityOfLife: "Very High",
-    transport: "Excellent",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["English", "Mandarin", "Malay", "Tamil"],
-    attractions: ["Marina Bay Sands", "Gardens by the Bay"],
-  },
-  Toronto: {
-    photo: "https://images.unsplash.com/photo-1555547631-7e8c37d3d7d7?q=80&w=2862&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€120 - €250",
-    rentals: "€1000 - €2000",
-    medical: "Very Good",
-    temp: "10°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["Toronto Film Festival", "Caribana"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "High",
-    costOfLiving: "Moderate",
-    languages: ["English", "French"],
-    attractions: ["CN Tower", "Royal Ontario Museum"],
-  },
-  "Buenos Aires": {
-    photo: "https://images.unsplash.com/photo-1588691512402-98547466540c?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€70 - €150",
-    rentals: "€400 - €800",
-    medical: "Good",
-    temp: "18°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["Tango Festival", "Carnaval Porteño"],
-    qualityOfLife: "Medium",
-    transport: "Good",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Spanish"],
-    attractions: ["La Boca", "Teatro Colón"],
-  },
-  Rome: {
-    photo: "https://images.unsplash.com/photo-1531572754719-cdc68ad7f053?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€100 - €250",
-    rentals: "€700 - €1500",
-    medical: "Very Good",
-    temp: "20°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Natale di Roma", "Estate Romana"],
-    qualityOfLife: "High",
-    transport: "Moderate",
-    safety: "High",
-    costOfLiving: "Moderate",
-    languages: ["Italian"],
-    attractions: ["Colosseum", "Trevi Fountain", "Vatican"],
-  },
-  Amsterdam: {
-    photo: "https://images.unsplash.com/photo-1534351347683-057bf258529e?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€150 - €350",
-    rentals: "€1000 - €2000",
-    medical: "Excellent",
-    temp: "11°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["King's Day", "Amsterdam Dance Event"],
-    qualityOfLife: "High",
-    transport: "Excellent",
-    safety: "High",
-    costOfLiving: "High",
-    languages: ["Dutch", "English"],
-    attractions: ["Canals", "Van Gogh Museum", "Anne Frank House"],
-  },
-  "Cape Town": {
-    photo: "https://images.unsplash.com/photo-1560935541-0969527f311c?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€80 - €180",
-    rentals: "€500 - €1000",
-    medical: "Good",
-    temp: "17°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Cape Town Carnival", "Jazz Festival"],
-    qualityOfLife: "Medium",
-    transport: "Limited",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["English", "Afrikaans"],
-    attractions: ["Table Mountain", "Robben Island"],
-  },
-  Bangkok: {
-    photo: "https://images.unsplash.com/photo-1595147389795-01609d470b9c?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€40 - €100",
-    rentals: "€300 - €700",
-    medical: "Good",
-    temp: "29°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Songkran", "Loy Krathong"],
-    qualityOfLife: "Moderate",
-    transport: "Moderate",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Thai", "English"],
-    attractions: ["Grand Palace", "Floating Markets"],
-  },
-  Barcelona: {
-    photo: "https://images.unsplash.com/photo-1534351347683-057bf258529e?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€120 - €280",
-    rentals: "€800 - €1800",
-    medical: "Very Good",
-    temp: "19°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["La Mercè", "Primavera Sound"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "High",
-    costOfLiving: "Moderate",
-    languages: ["Catalan", "Spanish"],
-    attractions: ["Sagrada Familia", "Park Güell"],
-  },
-  "San Francisco": {
-    photo: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€200 - €450+",
-    rentals: "€2000 - €5000+",
-    medical: "Excellent",
-    temp: "14°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Outside Lands", "Cherry Blossom Festival"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "Moderate",
-    costOfLiving: "Very High",
-    languages: ["English"],
-    attractions: ["Golden Gate Bridge", "Alcatraz"],
-  },
-  "New York": {
-    photo: "https://images.unsplash.com/photo-1534351347683-057bf258529e?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€250 - €500+",
-    rentals: "€2500 - €6000+",
-    medical: "Excellent",
-    temp: "13°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Macy's Thanksgiving Day Parade", "Tribeca Film Festival"],
-    qualityOfLife: "High",
-    transport: "Excellent",
-    safety: "Moderate",
-    costOfLiving: "Very High",
-    languages: ["English", "Spanish", "Chinese"],
-    attractions: ["Statue of Liberty", "Central Park", "Times Square"],
-  },
-  London: {
-    photo: "https://images.unsplash.com/photo-1503264116251-35a269479413?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€150 - €350",
-    rentals: "€1200 - €2500",
-    medical: "Very Good",
-    temp: "11°C avg",
-    sunHours: "4 hrs/day",
-    festivals: ["Notting Hill Carnival", "London Film Festival"],
-    qualityOfLife: "Very High",
-    transport: "Excellent",
-    safety: "High",
-    costOfLiving: "High",
-    languages: ["English"],
-    attractions: ["Big Ben", "London Eye", "Tower of London"],
-  },
-  Melbourne: {
-    photo: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€120 - €280",
-    rentals: "€900 - €2000",
-    medical: "Excellent",
-    temp: "20°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Melbourne International Comedy Festival", "Melbourne Cup"],
-    qualityOfLife: "Very High",
-    transport: "Excellent",
-    safety: "High",
-    costOfLiving: "High",
-    languages: ["English"],
-    attractions: ["Federation Square", "Royal Botanic Gardens", "Great Ocean Road"],
-  },
-  Vienna: {
-    photo: "https://images.unsplash.com/photo-1549645311-5f1b6d8e0c4e?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€100 - €250",
-    rentals: "€700 - €1500",
-    medical: "Excellent",
-    temp: "10°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["Vienna Opera Ball", "Donauinselfest"],
-    qualityOfLife: "Very High",
-    transport: "Excellent",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["German"],
-    attractions: ["Schönbrunn Palace", "St. Stephen's Cathedral", "Belvedere Museum"],
-  },
-  Tokyo: {
-    photo: "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€150 - €350",
-    rentals: "€1000 - €2500",
-    medical: "Excellent",
-    temp: "16°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Cherry Blossom Festival", "Sumida River Fireworks"],
-    qualityOfLife: "High",
-    transport: "Excellent",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["Japanese"],
-    attractions: ["Tokyo Tower", "Meiji Shrine", "Shibuya Crossing"],
-  },
-  Prague: {
-    photo: "https://images.unsplash.com/photo-1543248939-ff40856f65d5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€80 - €180",
-    rentals: "€500 - €1000",
-    medical: "Very Good",
-    temp: "9°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["Prague Spring International Music Festival", "Signal Festival"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "High",
-    costOfLiving: "Moderate",
-    languages: ["Czech"],
-    attractions: ["Charles Bridge", "Prague Castle", "Old Town Square"],
-  },
-  Munich: {
-    photo: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€120 - €280",
-    rentals: "€900 - €2000",
-    medical: "Excellent",
-    temp: "8°C avg",
-    sunHours: "4 hrs/day",
-    festivals: ["Oktoberfest", "Munich Film Festival"],
-    qualityOfLife: "Very High",
-    transport: "Excellent",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["German"],
-    attractions: ["Marienplatz", "Nymphenburg Palace", "English Garden"],
-  },
-  "San Diego": {
-    photo: "https://images.unsplash.com/photo-1582275630830-04e25edac2d4?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€150 - €300",
-    rentals: "€1200 - €2500",
-    medical: "Excellent",
-    temp: "18°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["San Diego Comic-Con", "Balboa Park December Nights"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "High",
-    costOfLiving: "High",
-    languages: ["English", "Spanish"],
-    attractions: ["San Diego Zoo", "Balboa Park", "La Jolla Cove"],
-  },
-  Paris: {
-    photo: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€180 - €400",
-    rentals: "€1000 - €2500",
-    medical: "Excellent",
-    temp: "12°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["Bastille Day", "Fête de la Musique"],
-    qualityOfLife: "Very High",
-    transport: "Excellent",
-    safety: "High",
-    costOfLiving: "High",
-    languages: ["French"],
-    attractions: ["Eiffel Tower", "Louvre Museum", "Notre-Dame Cathedral"],
-  },
-  Berlin: {
-    photo: "https://images.unsplash.com/photo-1549921296-3a6b95e09c44?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€100 - €200",
-    rentals: "€700 - €1500",
-    medical: "Excellent",
-    temp: "10°C avg",
-    sunHours: "4 hrs/day",
-    festivals: ["Berlin Film Festival", "Karneval der Kulturen"],
-    qualityOfLife: "High",
-    transport: "Excellent",
-    safety: "High",
-    costOfLiving: "Moderate",
-    languages: ["German", "English"],
-    attractions: ["Brandenburg Gate", "Berlin Wall", "Museum Island"],
-  },
-  Lisbon: {
-    photo: "https://images.unsplash.com/photo-1586182987324-4f376d39c2f0?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€90 - €200",
-    rentals: "€600 - €1200",
-    medical: "Very Good",
-    temp: "17°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Festa de Santo António", "Lisbon & Sintra Film Festival"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "High",
-    costOfLiving: "Moderate",
-    languages: ["Portuguese"],
-    attractions: ["Belém Tower", "Jerónimos Monastery", "Alfama District"],
-  },
-  Istanbul: {
-    photo: "https://images.unsplash.com/photo-1506354666786-959d6d497f1a?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€70 - €150",
-    rentals: "€400 - €900",
-    medical: "Good",
-    temp: "14°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Istanbul Music Festival", "Tulip Festival"],
-    qualityOfLife: "Medium",
-    transport: "Good",
-    safety: "Moderate",
-    costOfLiving: "Moderate",
-    languages: ["Turkish", "English"],
-    attractions: ["Hagia Sophia", "Blue Mosque", "Grand Bazaar"],
-  },
-  Seoul: {
-    photo: "https://images.unsplash.com/photo-1589969801973-52fb5d0a7c8b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€120 - €280",
-    rentals: "€800 - €1800",
-    medical: "Excellent",
-    temp: "12°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Seoul Lantern Festival", "Hi Seoul Festival"],
-    qualityOfLife: "High",
-    transport: "Excellent",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["Korean", "English"],
-    attractions: ["Gyeongbokgung Palace", "N Seoul Tower", "Bukchon Hanok Village"],
-  },
-  Osaka: {
-    photo: "https://images.unsplash.com/photo-1601009180775-7b5e4c02283a?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€100 - €250",
-    rentals: "€700 - €1500",
-    medical: "Excellent",
-    temp: "17°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Tenjin Matsuri", "Sumiyoshi Festival"],
-    qualityOfLife: "High",
-    transport: "Excellent",
-    safety: "Very High",
-    costOfLiving: "Moderate",
-    languages: ["Japanese"],
-    attractions: ["Osaka Castle", "Dotonbori", "Universal Studios Japan"],
-  },
-  "Los Angeles": {
-    photo: "https://images.unsplash.com/photo-1510340801659-4d9b2e0c1f5d?q=80&w=2824&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€150 - €400",
-    rentals: "€1500 - €3500+",
-    medical: "Excellent",
-    temp: "18°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Hollywood Christmas Parade", "LA Film Festival"],
-    qualityOfLife: "High",
-    transport: "Moderate",
-    safety: "Moderate",
-    costOfLiving: "Very High",
-    languages: ["English", "Spanish"],
-    attractions: ["Hollywood Walk of Fame", "Griffith Observatory", "Santa Monica Pier"],
-  },
-  Chicago: {
-    photo: "https://images.unsplash.com/photo-1517457210-bf26f9b2d861?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€100 - €250",
-    rentals: "€800 - €1800",
-    medical: "Excellent",
-    temp: "10°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Lollapalooza", "Taste of Chicago"],
-    qualityOfLife: "High",
-    transport: "Excellent",
-    safety: "Moderate",
-    costOfLiving: "Moderate",
-    languages: ["English"],
-    attractions: ["Millennium Park", "Art Institute of Chicago", "Navy Pier"],
-  },
-  Sydney: {
-    photo: "https://images.unsplash.com/photo-1506973035881-807d8b52f354?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€150 - €350",
-    rentals: "€1200 - €2500",
-    medical: "Excellent",
-    temp: "22°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Vivid Sydney", "Sydney Festival"],
-    qualityOfLife: "Very High",
-    transport: "Good",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["English"],
-    attractions: ["Sydney Opera House", "Sydney Harbour Bridge", "Bondi Beach"],
-  },
-  "Mexico City": {
-    photo: "https://images.unsplash.com/photo-1521747116050-4824556a31f7?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€50 - €120",
-    rentals: "€300 - €800",
-    medical: "Good",
-    temp: "18°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Día de Muertos", "Vive Latino"],
-    qualityOfLife: "Moderate",
-    transport: "Good",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Spanish"],
-    attractions: ["Zócalo", "Palacio de Bellas Artes", "Teotihuacan"],
-  },
-  Lima: {
-    photo: "https://images.unsplash.com/photo-1594957597148-5221b01625d3?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€40 - €100",
-    rentals: "€250 - €600",
-    medical: "Good",
-    temp: "20°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["Fiestas Patrias", "Mistura"],
-    qualityOfLife: "Moderate",
-    transport: "Moderate",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Spanish"],
-    attractions: ["Plaza Mayor", "Miraflores", "Barranco"],
-  },
-  Santiago: {
-    photo: "https://images.unsplash.com/photo-1547481138-07e06a3e5c94?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€60 - €130",
-    rentals: "€400 - €900",
-    medical: "Good",
-    temp: "14°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["Santiago a Mil", "Fiestas Patrias"],
-    qualityOfLife: "Medium",
-    transport: "Good",
-    safety: "Moderate",
-    costOfLiving: "Moderate",
-    languages: ["Spanish"],
-    attractions: ["Cerro San Cristóbal", "Plaza de Armas", "Barrio Bellavista"],
-  },
-  Bogotá: {
-    photo: "https://images.unsplash.com/photo-1544837581-22d7b51b32d0?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€50 - €120",
-    rentals: "€300 - €700",
-    medical: "Good",
-    temp: "14°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["Rock al Parque", "Bogotá International Film Festival"],
-    qualityOfLife: "Moderate",
-    transport: "Good",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Spanish"],
-    attractions: ["La Candelaria", "Monserrate", "Gold Museum"],
-  },
-  Copenhagen: {
-    photo: "https://images.unsplash.com/photo-1557997970-20510d024b4f?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€150 - €350",
-    rentals: "€1000 - €2000",
-    medical: "Excellent",
-    temp: "8°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["Copenhagen Jazz Festival", "Distortion"],
-    qualityOfLife: "Very High",
-    transport: "Excellent",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["Danish", "English"],
-    attractions: ["Tivoli Gardens", "Nyhavn", "The Little Mermaid"],
-  },
-  Helsinki: {
-    photo: "https://images.unsplash.com/photo-1587848698125-961f5b6f722a?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€100 - €250",
-    rentals: "€800 - €1700",
-    medical: "Excellent",
-    temp: "5°C avg",
-    sunHours: "4 hrs/day",
-    festivals: ["Flow Festival", "Helsinki Festival"],
-    qualityOfLife: "Very High",
-    transport: "Excellent",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["Finnish", "Swedish", "English"],
-    attractions: ["Suomenlinna", "Senate Square", "Temppeliaukio Church"],
-  },
-  Reykjavik: {
-    photo: "https://images.unsplash.com/photo-1549448007-8e6f1f4e7c3b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€180 - €400",
-    rentals: "€1200 - €2500",
-    medical: "Excellent",
-    temp: "5°C avg",
-    sunHours: "4 hrs/day",
-    festivals: ["Iceland Airwaves", "Winter Lights Festival"],
-    qualityOfLife: "Very High",
-    transport: "Good",
-    safety: "Very High",
-    costOfLiving: "Very High",
-    languages: ["Icelandic", "English"],
-    attractions: ["Hallgrímskirkja", "Blue Lagoon", "Golden Circle"],
-  },
-  Oslo: {
-    photo: "https://images.unsplash.com/photo-1550854449-f5c71a39f60a?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€150 - €350",
-    rentals: "€1000 - €2200",
-    medical: "Excellent",
-    temp: "6°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["Øya Festival", "Nobel Peace Prize Concert"],
-    qualityOfLife: "Very High",
-    transport: "Excellent",
-    safety: "Very High",
-    costOfLiving: "Very High",
-    languages: ["Norwegian", "English"],
-    attractions: ["Vigeland Park", "Oslo Opera House", "Holmenkollen Ski Jump"],
-  },
-  Stockholm: {
-    photo: "https://images.unsplash.com/photo-1533221980838-51f7d9a1f2f0?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€120 - €280",
-    rentals: "€900 - €1900",
-    medical: "Excellent",
-    temp: "7°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Stockholm Jazz Festival", "Midsummer"],
-    qualityOfLife: "Very High",
-    transport: "Excellent",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["Swedish", "English"],
-    attractions: ["Gamla Stan", "Vasa Museum", "Royal Palace"],
-  },
-  Brussels: {
-    photo: "https://images.unsplash.com/photo-1558966779-7a0e1c0d5c9c?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€90 - €200",
-    rentals: "€700 - €1500",
-    medical: "Excellent",
-    temp: "11°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["Flower Carpet", "Ommegang"],
-    qualityOfLife: "High",
-    transport: "Excellent",
-    safety: "High",
-    costOfLiving: "Moderate",
-    languages: ["French", "Dutch", "English"],
-    attractions: ["Grand Place", "Atomium", "Manneken Pis"],
-  },
-  Athens: {
-    photo: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€70 - €150",
-    rentals: "€400 - €900",
-    medical: "Good",
-    temp: "20°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Athens & Epidaurus Festival", "Apokries"],
-    qualityOfLife: "Moderate",
-    transport: "Good",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Greek", "English"],
-    attractions: ["Acropolis", "Parthenon", "Plaka"],
-  },
-  Warsaw: {
-    photo: "https://images.unsplash.com/photo-1594957597148-5221b01625d3?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€60 - €130",
-    rentals: "€350 - €800",
-    medical: "Very Good",
-    temp: "9°C avg",
-    sunHours: "5 hrs/day",
-    festivals: ["Warsaw Autumn", "Jewish Culture Festival"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "High",
-    costOfLiving: "Low",
-    languages: ["Polish", "English"],
-    attractions: ["Old Town Market Place", "Palace of Culture and Science", "Łazienki Park"],
-  },
-  Budapest: {
-    photo: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€60 - €140",
-    rentals: "€300 - €700",
-    medical: "Good",
-    temp: "11°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Sziget Festival", "Budapest Spring Festival"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "High",
-    costOfLiving: "Low",
-    languages: ["Hungarian", "English"],
-    attractions: ["Parliament Building", "Buda Castle", "Fisherman's Bastion"],
-  },
-  "Kuala Lumpur": {
-    photo: "https://images.unsplash.com/photo-1547481138-07e06a3e5c94?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€50 - €120",
-    rentals: "€300 - €700",
-    medical: "Good",
-    temp: "27°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Thaipusam", "Deepavali"],
-    qualityOfLife: "Moderate",
-    transport: "Good",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Malay", "English", "Mandarin", "Tamil"],
-    attractions: ["Petronas Towers", "Batu Caves", "Central Market"],
-  },
-  Jakarta: {
-    photo: "https://images.unsplash.com/photo-1594957597148-5221b01625d3?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€40 - €100",
-    rentals: "€250 - €600",
-    medical: "Good",
-    temp: "28°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Jakarta Fair", "Independence Day"],
-    qualityOfLife: "Moderate",
-    transport: "Moderate",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Indonesian", "English"],
-    attractions: ["National Monument", "Kota Tua", "Ragunan Zoo"],
-  },
-  Manila: {
-    photo: "https://images.unsplash.com/photo-1544837581-22d7b51b32d0?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€40 - €100",
-    rentals: "€200 - €500",
-    medical: "Good",
-    temp: "27°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Sinulog Festival", "Dinagyang Festival"],
-    qualityOfLife: "Moderate",
-    transport: "Moderate",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Filipino", "English"],
-    attractions: ["Intramuros", "Rizal Park", "San Agustin Church"],
-  },
-  "Ho Chi Minh City": {
-    photo: "https://images.unsplash.com/photo-1557997970-20510d024b4f?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€40 - €100",
-    rentals: "€250 - €600",
-    medical: "Good",
-    temp: "28°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Tet Nguyen Dan", "Hung Kings' Commemoration Day"],
-    qualityOfLife: "Moderate",
-    transport: "Moderate",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Vietnamese", "English"],
-    attractions: ["Cu Chi Tunnels", "War Remnants Museum", "Ben Thanh Market"],
-  },
-  Hanoi: {
-    photo: "https://images.unsplash.com/photo-1587848698125-961f5b6f722a?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€30 - €90",
-    rentals: "€200 - €500",
-    medical: "Good",
-    temp: "24°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Tet Nguyen Dan", "Hanoi Liberation Day"],
-    qualityOfLife: "Moderate",
-    transport: "Moderate",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Vietnamese", "English"],
-    attractions: ["Hoan Kiem Lake", "Temple of Literature", "Old Quarter"],
-  },
-  Doha: {
-    photo: "https://images.unsplash.com/photo-1549448007-8e6f1f4e7c3b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€180 - €400",
-    rentals: "€1200 - €3000",
-    medical: "Excellent",
-    temp: "30°C avg",
-    sunHours: "10 hrs/day",
-    festivals: ["Qatar National Day", "Doha Tribeca Film Festival"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["Arabic", "English"],
-    attractions: ["Museum of Islamic Art", "Souq Waqif", "The Pearl-Qatar"],
-  },
-  Riyadh: {
-    photo: "https://images.unsplash.com/photo-1550854449-f5c71a39f60a?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€100 - €250",
-    rentals: "€800 - €2000",
-    medical: "Good",
-    temp: "29°C avg",
-    sunHours: "10 hrs/day",
-    festivals: ["Riyadh Season", "Janadriyah Festival"],
-    qualityOfLife: "Medium",
-    transport: "Moderate",
-    safety: "High",
-    costOfLiving: "Moderate",
-    languages: ["Arabic", "English"],
-    attractions: ["Kingdom Centre Tower", "Masmak Fortress", "Al-Faisaliah Tower"],
-  },
-  "Tel Aviv": {
-    photo: "https://images.unsplash.com/photo-1533221980838-51f7d9a1f2f0?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€120 - €280",
-    rentals: "€800 - €1800",
-    medical: "Excellent",
-    temp: "20°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Tel Aviv Pride", "White Night"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "Moderate",
-    costOfLiving: "High",
-    languages: ["Hebrew", "English"],
-    attractions: ["Old Jaffa", "Rothschild Boulevard", "Carmel Market"],
-  },
-  Cairo: {
-    photo: "https://images.unsplash.com/photo-1558966779-7a0e1c0d5c9c?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€50 - €120",
-    rentals: "€300 - €700",
-    medical: "Good",
-    temp: "22°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Cairo International Film Festival", "Eid al-Fitr"],
-    qualityOfLife: "Moderate",
-    transport: "Moderate",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Arabic", "English"],
-    attractions: ["Pyramids of Giza", "Khan el-Khalili", "Egyptian Museum"],
-  },
-  Nairobi: {
-    photo: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€60 - €150",
-    rentals: "€350 - €800",
-    medical: "Good",
-    temp: "19°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Safari Rally", "Nairobi International Trade Festival"],
-    qualityOfLife: "Medium",
-    transport: "Limited",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["Swahili", "English"],
-    attractions: ["Nairobi National Park", "Giraffe Centre", "Karen Blixen Museum"],
-  },
-  Johannesburg: {
-    photo: "https://images.unsplash.com/photo-1549645311-5f1b6d8e0c4e?q=80&w=2832&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€70 - €180",
-    rentals: "€500 - €1200",
-    medical: "Good",
-    temp: "17°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["Joburg Arts Alive International Festival", "Oppikoppi"],
-    qualityOfLife: "Medium",
-    transport: "Moderate",
-    safety: "Moderate",
-    costOfLiving: "Low",
-    languages: ["English", "Zulu", "Xhosa"],
-    attractions: ["Apartheid Museum", "Soweto", "Lion & Safari Park"],
-  },
-    "Venice": {
-    photo: "https://images.unsplash.com/photo-1521404106516-e555811c75c8?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€150 - €400+",
-    rentals: "€900 - €2500+",
-    medical: "Good",
-    temp: "14°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Carnaval de Venecia", "Bienal de Venecia"],
-    qualityOfLife: "High",
-    transport: "Excelente (vaporettos, góndolas, a pie)",
-    safety: "Muy Alta",
-    costOfLiving: "Alta",
-    languages: ["Italiano"],
-    attractions: ["Piazza San Marco", "Palazzo Ducale", "Puente de Rialto"],
-  },
-  "Florence": {
-    photo: "https://images.unsplash.com/photo-1510414902143-69024f9712e5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€100 - €300+",
-    rentals: "€700 - €2000+",
-    medical: "Good",
-    temp: "15°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["Maggio Musicale Fiorentino", "Calcio Storico Fiorentino"],
-    qualityOfLife: "High",
-    transport: "Buena (a pie, autobuses)",
-    safety: "Alta",
-    costOfLiving: "Media",
-    languages: ["Italiano"],
-    attractions: ["Duomo de Florencia", "Galería de la Academia (David de Miguel Ángel)", "Ponte Vecchio", "Galería de los Uffizi"],
-  },
-  "Kyoto": {
-    photo: "https://images.unsplash.com/photo-1542051841-383792617694?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€80 - €250+",
-    rentals: "€600 - €1800+",
-    medical: "Excellent",
-    temp: "15°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Gion Matsuri", "Aoi Matsuri"],
-    qualityOfLife: "Muy Alta",
-    transport: "Excelente (autobuses, metro)",
-    safety: "Extremadamente Alta",
-    costOfLiving: "Media",
-    languages: ["Japonés"],
-    attractions: ["Templo Kinkaku-ji (Pabellón Dorado)", "Santuario Fushimi Inari-taisha", "Bosque de bambú de Arashiyama", "Distrito de Gion"],
-  },
-  "Rio de Janeiro": {
-    photo: "https://images.unsplash.com/photo-1506085446077-80dd86d1b7ac?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€70 - €220+",
-    rentals: "€500 - €1500+",
-    medical: "Medium",
-    temp: "26°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["Carnaval de Río", "Rock in Rio"],
-    qualityOfLife: "Media",
-    transport: "Media",
-    safety: "Media (variación por zonas)",
-    costOfLiving: "Media",
-    languages: ["Portugués"],
-    attractions: ["Cristo Redentor", "Pan de Azúcar", "Playas de Copacabana e Ipanema", "Escadaria Selarón"],
-  },
-  "Marrakech": {
-    photo: "https://images.unsplash.com/photo-1517400508412-25925345d1b7?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€50 - €180+",
-    rentals: "€300 - €1000+",
-    medical: "Medium",
-    temp: "22°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Festival Internacional de Cine de Marrakech", "Festival de las Artes Populares"],
-    qualityOfLife: "Media",
-    transport: "Baja (principalmente taxis y calesas)",
-    safety: "Media",
-    costOfLiving: "Baja",
-    languages: ["Árabe", "Francés"],
-    attractions: ["Djemaa el-Fna", "Jardín Majorelle", "Palacio de la Bahía", "Mezquita Koutoubia"],
-  },
-  "Siem Reap": {
-    photo: "https://images.unsplash.com/photo-1528131368297-a77918a24c52?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€20 - €100+",
-    rentals: "€150 - €600+",
-    medical: "Low",
-    temp: "28°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["Festival del Agua (Bon Om Touk)", "Festival de la Cosecha del Arroz"],
-    qualityOfLife: "Baja",
-    transport: "Baja (tuk-tuks)",
-    safety: "Media",
-    costOfLiving: "Muy Baja",
-    languages: ["Jemer", "Inglés"],
-    attractions: ["Angkor Wat", "Bayon (Angkor Thom)", "Ta Prohm", "Pub Street"],
-  },
-  "Dubrovnik": {
-    photo: "https://images.unsplash.com/photo-1544439055-14f7d49842f1?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€100 - €300+",
-    rentals: "€700 - €2000+",
-    medical: "Good",
-    temp: "17°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Festival de Verano de Dubrovnik", "Carnaval de Dubrovnik"],
-    qualityOfLife: "Alta",
-    transport: "Buena (autobuses, a pie)",
-    safety: "Muy Alta",
-    costOfLiving: "Media",
-    languages: ["Croata"],
-    attractions: ["Murallas de Dubrovnik", "Stradun", "Teleférico de Srđ", "Isla de Lokrum"],
-  },
-  "Edinburgh": {
-    photo: "https://images.unsplash.com/photo-1507920367468-b78ee2b8109d?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€120 - €350+",
-    rentals: "€800 - €2200+",
-    medical: "Good",
-    temp: "9°C avg",
-    sunHours: "4 hrs/day",
-    festivals: ["Festival Fringe de Edimburgo", "Royal Military Tattoo"],
-    qualityOfLife: "Alta",
-    transport: "Buena (autobuses, a pie)",
-    safety: "Alta",
-    costOfLiving: "Media",
-    languages: ["Inglés"],
-    attractions: ["Castillo de Edimburgo", "Royal Mile", "Arthur's Seat", "Palacio de Holyroodhouse"],
-  },
-  "Québec City": {
-    photo: "https://images.unsplash.com/photo-1601633519894-ed4769074092?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€100 - €300+",
-    rentals: "€600 - €1800+",
-    medical: "Good",
-    temp: "5°C avg (muy variable)",
-    sunHours: "6 hrs/day",
-    festivals: ["Carnaval de Invierno de Quebec", "Festival de Verano de Quebec"],
-    qualityOfLife: "Alta",
-    transport: "Buena (a pie, autobuses)",
-    safety: "Muy Alta",
-    costOfLiving: "Media",
-    languages: ["Francés", "Inglés"],
-    attractions: ["Château Frontenac", "Viejo Quebec (ciudad fortificada)", "Llanuras de Abraham", "Cascadas de Montmorency (cercanas)"],
-  },
-  "Jerusalem": {
-    photo: "https://images.unsplash.com/photo-1563212879-166c3031023d?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€90 - €280+",
-    rentals: "€700 - €2000+",
-    medical: "Good",
-    temp: "18°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Festival de la Luz de Jerusalén", "Festival Internacional de Cine de Jerusalén"],
-    qualityOfLife: "Media",
-    transport: "Media (tranvía, autobuses)",
-    safety: "Media (consultar alertas de viaje)",
-    costOfLiving: "Media",
-    languages: ["Hebreo", "Árabe", "Inglés (muy hablado)"],
-    attractions: ["Muro de las Lamentaciones", "Ciudad Vieja de Jerusalén", "Cúpula de la Roca", "Vía Dolorosa"],
-  },
-    "Amman": {
-    photo: "https://images.unsplash.com/photo-1604107401533-5c5b404d88e0?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€60 - €200+",
-    rentals: "€400 - €1200+",
-    medical: "Good",
-    temp: "20°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Jerash Festival (cercano)", "Festival de la Cultura Árabe"],
-    qualityOfLife: "Media",
-    transport: "Media (taxis, autobuses)",
-    safety: "Alta",
-    costOfLiving: "Baja",
-    languages: ["Árabe", "Inglés"],
-    attractions: ["Ciudadela de Ammán", "Teatro Romano de Ammán", "Rainbow Street"],
-  },
-  "Beirut": {
-    photo: "https://images.unsplash.com/photo-1603525547683-066b447814b7?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€70 - €250+",
-    rentals: "€500 - €1500+",
-    medical: "Medium",
-    temp: "22°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Festival Internacional de Música de Beirut", "Festival de Jazz de Beirut"],
-    qualityOfLife: "Media (considerar situación actual)",
-    transport: "Baja (taxis)",
-    safety: "Media (consultar alertas de viaje)",
-    costOfLiving: "Media",
-    languages: ["Árabe", "Francés", "Inglés"],
-    attractions: ["Roca de Raouché", "Corniche de Beirut", "Museo Nacional de Beirut", "Barrio de Gemmayzeh"],
-  },
-  "Abu Dhabi": {
-    photo: "https://images.unsplash.com/photo-1605333552097-f131a9824c96?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€180 - €500+",
-    rentals: "€1200 - €3500+",
-    medical: "Excellent",
-    temp: "30°C avg",
-    sunHours: "10 hrs/day",
-    festivals: ["Fórmula 1 Abu Dhabi Grand Prix", "Sheikh Zayed Heritage Festival"],
-    qualityOfLife: "High",
-    transport: "Good",
-    safety: "Very High",
-    costOfLiving: "High",
-    languages: ["Árabe", "Inglés"],
-    attractions: ["Mezquita Sheikh Zayed", "Louvre Abu Dhabi", "Ferrari World Abu Dhabi", "Yas Island"],
-  },
-  "Muscat": {
-    photo: "https://images.unsplash.com/photo-1542106096-72410a8d5c0e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€80 - €250+",
-    rentals: "€600 - €1800+",
-    medical: "Good",
-    temp: "28°C avg",
-    sunHours: "10 hrs/day",
-    festivals: ["Festival de Muscat", "Tour de Omán (ciclismo)"],
-    qualityOfLife: "High",
-    transport: "Low (principalmente taxis)",
-    safety: "Very High",
-    costOfLiving: "Media",
-    languages: ["Árabe", "Inglés"],
-    attractions: ["Gran Mezquita Sultán Qaboos", "Mutrah Souq", "Palacio Al Alam", "Ópera Real de Mascate"],
-  },
-  "Durban": {
-    photo: "https://images.unsplash.com/photo-1596720275815-59c4b4a378a5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€50 - €150+",
-    rentals: "€300 - €900+",
-    medical: "Good",
-    temp: "23°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["Durban July (carreras de caballos)", "Durban International Film Festival"],
-    qualityOfLife: "Media",
-    transport: "Baja (necesario coche)",
-    safety: "Media",
-    costOfLiving: "Baja",
-    languages: ["Zulú", "Inglés"],
-    attractions: ["Golden Mile", "uShaka Marine World", "Jardín Botánico de Durban", "Museo Phansi"],
-  },
-  "Casablanca": {
-    photo: "https://images.unsplash.com/photo-1610444391307-e5473d09a56c?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€60 - €200+",
-    rentals: "€400 - €1200+",
-    medical: "Medium",
-    temp: "20°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Jazzablanca Festival", "Festival Internacional de Cine Documental de Agadir (cercano)"],
-    qualityOfLife: "Media",
-    transport: "Media (tranvía, taxis)",
-    safety: "Media",
-    costOfLiving: "Baja",
-    languages: ["Árabe", "Francés"],
-    attractions: ["Mezquita Hassan II", "La Corniche", "Antigua Medina", "Place Mohammed V"],
-  },
-  "Tunis": {
-    photo: "https://images.unsplash.com/photo-1542103598-a38f830a6c22?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€40 - €150+",
-    rentals: "€250 - €800+",
-    medical: "Medium",
-    temp: "20°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["Festival Internacional de Cartago (cercano)", "Festival de la Medina"],
-    qualityOfLife: "Media",
-    transport: "Media (tranvía, taxis)",
-    safety: "Media (consultar alertas de viaje)",
-    costOfLiving: "Muy Baja",
-    languages: ["Árabe", "Francés"],
-    attractions: ["Medina de Túnez", "Museo Nacional del Bardo", "Ruinas de Cartago (cercanas)", "Sidi Bou Said (cercano)"],
-  },
-  "Algiers": {
-    photo: "https://images.unsplash.com/photo-1629851609139-66c30311f9e1?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€50 - €180+",
-    rentals: "€300 - €1000+",
-    medical: "Medium",
-    temp: "19°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["Festival Internacional de Jazz de Argel", "Festival Panafricano"],
-    qualityOfLife: "Media",
-    transport: "Media (metro, tranvía, taxis)",
-    safety: "Media (consultar alertas de viaje)",
-    costOfLiving: "Baja",
-    languages: ["Árabe", "Francés"],
-    attractions: ["Kasbah de Argel", "Basílica de Nuestra Señora de África", "Monument des Martyrs", "Jardín de pruebas de Hamma"],
-  },
-  "Tripoli": { // Nota: Información turística puede ser limitada debido a la situación actual.
-    photo: "https://images.unsplash.com/photo-1620023023249-166258908f0a?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "N/A (Turismo limitado)",
-    rentals: "N/A (Turismo limitado)",
-    medical: "Low (Turismo limitado)",
-    temp: "20°C avg",
-    sunHours: "9 hrs/day",
-    festivals: ["N/A (Turismo limitado)"],
-    qualityOfLife: "Baja (considerar situación actual)",
-    transport: "N/A (Turismo limitado)",
-    safety: "Baja (consultar alertas de viaje)",
-    costOfLiving: "Baja",
-    languages: ["Árabe"],
-    attractions: ["Arco de Marco Aurelio", "Medina de Trípoli", "Museo de Jamahiriya (cerrado/inactivo)"],
-  },
-  "Khartoum": {
-    photo: "https://images.unsplash.com/photo-1596720275815-59c4b4a378a5?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€40 - €150+",
-    rentals: "€250 - €800+",
-    medical: "Low",
-    temp: "30°C avg",
-    sunHours: "10 hrs/day",
-    festivals: ["Festival de Jazz de Jartum"],
-    qualityOfLife: "Baja (considerar situación actual)",
-    transport: "Baja (taxis)",
-    safety: "Baja (consultar alertas de viaje)",
-    costOfLiving: "Muy Baja",
-    languages: ["Árabe", "Inglés"],
-    attractions: ["Confluencia del Nilo Azul y Blanco", "Museo Nacional de Sudán", "Mercado Omdurman (cercano)"],
-  },
-  "Addis Ababa": {
-    photo: "https://images.unsplash.com/photo-1587522513478-f7396c2136e0?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€30 - €120+",
-    rentals: "€200 - €700+",
-    medical: "Medium",
-    temp: "19°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Timkat (Epifanía Etíope)", "Meskel"],
-    qualityOfLife: "Media",
-    transport: "Media (taxis, minibuses)",
-    safety: "Media",
-    costOfLiving: "Baja",
-    languages: ["Amárico", "Inglés"],
-    attractions: ["Museo Nacional de Etiopía (Lucy)", "Iglesia de San Jorge", "Mercado Merkato", "Monte Entoto"],
-  },
-  "Accra": {
-    photo: "https://images.unsplash.com/photo-1628178129038-f8a8b1b59367?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€40 - €150+",
-    rentals: "€250 - €800+",
-    medical: "Low",
-    temp: "27°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Homowo Festival", "Chale Wote Street Art Festival"],
-    qualityOfLife: "Media",
-    transport: "Baja (taxis, tro-tros)",
-    safety: "Media",
-    costOfLiving: "Baja",
-    languages: ["Inglés", "Twi", "Ga"],
-    attractions: ["Arco de la Independencia", "Kwame Nkrumah Mausoleum", "Mercado de Makola", "Castillo de Osu"],
-  },
-  "Lagos": {
-    photo: "https://images.unsplash.com/photo-1628178129038-f8a8b1b59367?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-    hotels: "€50 - €200+",
-    rentals: "€300 - €1000+",
-    medical: "Low",
-    temp: "28°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Lagos Photo Festival", "Felabration"],
-    qualityOfLife: "Baja",
-    transport: "Muy Baja (tráfico intenso, okadas, taxis)",
-    safety: "Baja (consultar alertas de viaje)",
-    costOfLiving: "Media",
-    languages: ["Inglés", "Yoruba"],
-    attractions: ["Museo Nacional de Nigeria", "Playas de Victoria Island", "Freedom Park", "Mercado de Lekki"],
-  },
-  "Dakar": {
-    photo: "https://images.unsplash.com/photo-1614742718790-21a4f0b2f5d9?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€40 - €150+",
-    rentals: "€250 - €800+",
-    medical: "Medium",
-    temp: "27°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["Bienal de Arte Africano (Dak'Art)", "Festival Internacional de Jazz de Saint-Louis (cercano)"],
-    qualityOfLife: "Media",
-    transport: "Media (taxis, car rapides)",
-    safety: "Media",
-    costOfLiving: "Baja",
-    languages: ["Francés", "Wolof"],
-    attractions: ["Monumento al Renacimiento Africano", "Isla de Gorea", "Museo de las Civilizaciones Negras", "Mercado Kermel"],
-  },
-  "Abidjan": {
-    photo: "https://images.unsplash.com/photo-1601633519894-ed4769074092?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€50 - €180+",
-    rentals: "€300 - €1000+",
-    medical: "Low",
-    temp: "28°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["FEMUA (Festival des Musiques Urbaines d'Anoumabo)", "Festival International du Film d'Abidjan"],
-    qualityOfLife: "Media",
-    transport: "Media (taxis, gbaka)",
-    safety: "Media",
-    costOfLiving: "Baja",
-    languages: ["Francés"],
-    attractions: ["Catedral de San Pablo", "Museo de las Civilizaciones de Costa de Marfil", "Parque Nacional de Banco (cercano)"],
-  },
-  "Douala": {
-    photo: "https://images.unsplash.com/photo-1614742718790-21a4f0b2f5d9?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-    hotels: "€40 - €150+",
-    rentals: "€250 - €800+",
-    medical: "Low",
-    temp: "28°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["Festival de las Artes de Douala"],
-    qualityOfLife: "Media",
-    transport: "Baja (taxis)",
-    safety: "Media",
-    costOfLiving: "Baja",
-    languages: ["Francés", "Inglés"],
-    attractions: ["Mercado de Akwa", "Catedral de San Pedro y San Pablo", "La Pagode", "Museo Marítimo de Douala"],
-  },
-  "Kinshasa": {
-    photo: "https://images.unsplash.com/photo-1620023023249-166258908f0a?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    hotels: "€50 - €200+",
-    rentals: "€300 - €1000+",
-    medical: "Low",
-    temp: "26°C avg",
-    sunHours: "6 hrs/day",
-    festivals: ["FIKIN (Foire Internationale de Kinshasa)"],
-    qualityOfLife: "Baja (considerar situación actual)",
-    transport: "Baja (taxis, wewa)",
-    safety: "Baja (consultar alertas de viaje)",
-    costOfLiving: "Baja",
-    languages: ["Francés", "Lingala", "Kikongo", "Suajili"],
-    attractions: ["Parque Nacional de Virunga (requiere viaje)", "Museo Nacional del Congo", "Mercado de Zando"],
-  },
-  "Luanda": {
-    photo: "https://images.unsplash.com/photo-1629851609139-66c30311f9e1?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-    hotels: "€80 - €250+",
-    rentals: "€600 - €1800+",
-    medical: "Low",
-    temp: "26°C avg",
-    sunHours: "7 hrs/day",
-    festivals: ["Carnaval de Luanda", "Luanda International Jazz Festival"],
-    qualityOfLife: "Media",
-    transport: "Baja (taxis)",
-    safety: "Media",
-    costOfLiving: "Alta",
-    languages: ["Portugués"],
-    attractions: ["Fortaleza de São Miguel", "Mirador da Lua", "Ilha do Cabo", "Museo Nacional de Esclavitud"],
-  },
-  "Harare": {
-    photo: "https://images.unsplash.com/photo-1628178129038-f8a8b1b59367?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-    hotels: "€40 - €150+",
-    rentals: "€250 - €800+",
-    medical: "Low",
-    temp: "19°C avg",
-    sunHours: "8 hrs/day",
-    festivals: ["Festival Internacional de Arte de Harare (HIFA)", "Harare Agricultural Show"],
-    qualityOfLife: "Media",
-    transport: "Baja (taxis, combis)",
-    safety: "Media",
-    costOfLiving: "Baja",
-    languages: ["Inglés", "Shona", "Ndebele"],
-    attractions: ["Parque Nacional de las Cataratas Victoria (requiere viaje)", "Museo de Ciencias Humanas de Harare", "Jardín Botánico Nacional y Bosque de Investigaciones"],
-  },
+const compareStats = {
+  population: "3.3M",
+  avgRent: "$950",
+  safety: "Medium",
+  climate: "Mediterranean",
+  healthcare: "Very good",
+  education: "Excellent",
+  transport: "Very efficient",
+  expatCommunity: "Very active",
+  nightlife: "Intense",
+  internet: "300 Mbps",
+  costOfLiving: "High",
+  airQuality: "Fair",
+  greenSpaces: "Moderate",
+  walkability: "Good",
+  jobMarket: "Competitive",
+  taxes: "High",
+  noiseLevel: "Medium",
+  traffic: "Heavy",
+  weatherConsistency: "Mild",
 };
 
 export default function App() {
-  const [originCity, setOriginCity] = useState("None");
-  const [selectedCity, setSelectedCity] = useState(null);
-  const [filters, setFilters] = useState({
-    costOfLiving: "All",
-    safety: "All",
-    climate: "All",
-  });
-
-  // Estado para detectar ancho ventana y adaptar diseño
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1200);
+  const [originCity, setOriginCity] = useState("");
+  const [phase, setPhase] = useState("intro");
+  const [countries, setCountries] = useState([]);
+  const [hoverD, setHoverD] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [provinces, setProvinces] = useState([]);
+  const [hoverProvince, setHoverProvince] = useState(null);
+  const [selectedProvince, setSelectedProvince] = useState(null);
+  const [flipped, setFlipped] = useState(false);
+  const globeEl = useRef();
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    fetch("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
+      .then((res) => res.json())
+      .then((data) => setCountries(data.features));
   }, []);
 
-  const onMarkerClick = useCallback((city) => {
-    setSelectedCity(city);
-  }, []);
+  const fetchProvinces = async (countryName) => {
+    const slug = countryName
+      .toLowerCase()
+      .replace(/\s/g, "-")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    try {
+      const res = await fetch(`/livably/geo/provincias/${slug}.geojson`);
+      const data = await res.json();
+      const featuresWithNombre = data.features.map((f) => ({
+        ...f,
+        properties: {
+          ...f.properties,
+          nombre: f.properties.NAME_2 || f.properties.name || f.properties.state_name || "Unnamed",
+        },
+      }));
+      setProvinces(featuresWithNombre);
+    } catch (err) {
+      console.error("Could not load provinces for", countryName);
+      setProvinces([]);
+    }
+  };
 
-  const filteredCities = cities.filter(({ name }) => {
-    const data = cityData[name];
-    if (!data) return false;
-    const matchesCost =
-      filters.costOfLiving === "All" ||
-      data.costOfLiving === filters.costOfLiving;
-    const matchesSafety =
-      filters.safety === "All" || data.safety === filters.safety;
-    const matchesClimate =
-      filters.climate === "All" ||
-      (filters.climate === "Warm" && parseInt(data.temp) > 20) ||
-      (filters.climate === "Cold" && parseInt(data.temp) < 15);
-    return matchesCost && matchesSafety && matchesClimate;
-  });
+  const startExploring = () => {
+    if (originCity) setPhase("globe");
+  };
+
+  const onCountryClick = (d) => {
+    const countryName = d.properties.name;
+    setSelectedCountry(countryName);
+    fetchProvinces(countryName);
+    setPhase("clouds");
+  };
+
+  const goBackToCountries = () => {
+    setPhase("globe");
+    setSelectedProvince(null);
+    setProvinces([]);
+  };
+
+  useEffect(() => {
+    if (phase === "clouds" && selectedCountry) {
+      const country = countries.find((c) => c.properties.name === selectedCountry);
+      if (!country) return;
+
+      const coordinates = country.geometry.coordinates.flat(Infinity);
+      const lats = coordinates.filter((_, i) => i % 2 === 1);
+      const lngs = coordinates.filter((_, i) => i % 2 === 0);
+      const latCenter = lats.reduce((a, b) => a + b, 0) / lats.length;
+      const lngCenter = lngs.reduce((a, b) => a + b, 0) / lngs.length;
+
+      globeEl.current.pointOfView({ lat: latCenter, lng: lngCenter, altitude: 0.8 }, 2000);
+
+      const timer = setTimeout(() => setPhase("provinces"), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, selectedCountry, countries]);
 
   return (
     <div
-      style={{
-        display: "flex",
-        flexDirection: isMobile ? "column" : "row",
-        height: "100vh",
-        fontFamily: "Segoe UI, sans-serif",
-        backgroundColor: "#fafafa",
-        color: "#333",
-      }}
+      className={`min-h-screen w-full transition-colors duration-700 ${
+        phase === "intro"
+          ? "bg-gradient-to-br from-purple-200 to-blue-300 p-6 flex items-center justify-center"
+          : "bg-gray-900"
+      }`}
     >
-      {/* Panel lateral */}
-      <div
-        style={{
-          width: isMobile ? "100%" : "380px",
-          height: isMobile ? "auto" : "100vh",
-          backgroundColor: "#fdfcfb",
-          boxShadow: isMobile
-            ? "0 2px 10px rgba(0, 0, 0, 0.1)"
-            : "2px 0 10px rgba(0, 0, 0, 0.1)",
-          overflowY: "auto",
-          padding: "24px",
-          fontFamily: "Arial, sans-serif",
-          borderRadius: isMobile ? "0 0 10px 10px" : "0 10px 10px 0",
-          flexShrink: 0,
-        }}
-      >
-        <h2
-          style={{
-            textAlign: "center",
-            color: "#6a1b9a",
-            fontSize: "28px",
-            marginBottom: "20px",
-          }}
+      {phase === "intro" && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-3xl shadow-xl p-10 max-w-md w-full text-center"
         >
-          LIVABLY
-        </h2>
-
-        {/* Selección de ciudad de origen */}
-        <div style={{ marginBottom: "24px" }}>
-          <label
-            htmlFor="origin"
-            style={{ fontWeight: "bold", display: "block", marginBottom: "6px" }}
-          >
-            Ciudad de Origen:
-          </label>
+          <h1 className="text-5xl font-extrabold text-purple-800 mb-6 drop-shadow-md">
+            LIVABLY
+          </h1>
+          <p className="text-gray-700 mb-8 text-lg">Choose your origin city to start your journey</p>
           <select
-            id="origin"
+            className="w-full p-4 rounded-xl border border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-lg mb-8"
             value={originCity}
             onChange={(e) => setOriginCity(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "8px",
-              border: "1px solid #ccc",
-              fontSize: "15px",
-            }}
           >
+            <option value="" disabled>
+              Select your city
+            </option>
             {cities.map(({ name }) => (
               <option key={name} value={name}>
                 {name}
               </option>
             ))}
           </select>
-        </div>
-
-        {/* Filtros */}
-        <div style={{ marginBottom: "24px" }}>
-          <h4
-            style={{ color: "#333", fontSize: "18px", marginBottom: "12px" }}
+          <button
+            onClick={startExploring}
+            disabled={!originCity}
+            className={`w-full py-4 rounded-xl text-white font-semibold transition ${
+              originCity ? "bg-purple-700 hover:bg-purple-800" : "bg-purple-300 cursor-not-allowed"
+            }`}
           >
-            Filtros:
-          </h4>
+            Start
+          </button>
+        </motion.div>
+      )}
 
-          {[
-            {
-              label: "Costo de vida",
-              key: "costOfLiving",
-              options: [
-                { value: "All", label: "Todos" },
-                { value: "Low", label: "Bajo" },
-                { value: "Moderate", label: "Moderado" },
-                { value: "High", label: "Alto" },
-                { value: "Very High", label: "Muy alto" },
-              ],
-            },
-            {
-              label: "Seguridad",
-              key: "safety",
-              options: [
-                { value: "All", label: "Todas" },
-                { value: "Low", label: "Baja" },
-                { value: "Moderate", label: "Moderada" },
-                { value: "High", label: "Alta" },
-                { value: "Very High", label: "Muy alta" },
-              ],
-            },
-            {
-              label: "Clima",
-              key: "climate",
-              options: [
-                { value: "All", label: "Todos" },
-                { value: "Warm", label: "Cálido (> 20°C)" },
-                { value: "Cold", label: "Frío (< 15°C)" },
-              ],
-            },
-          ].map(({ label, key, options }) => (
-            <div key={key} style={{ marginTop: "10px" }}>
-              <label
-                style={{ display: "block", fontWeight: "600", marginBottom: "6px" }}
-              >
-                {label}:
-              </label>
-              <select
-                value={filters[key]}
-                onChange={(e) =>
-                  setFilters({ ...filters, [key]: e.target.value })
-                }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  borderRadius: "8px",
-                  border: "1px solid #ccc",
-                  fontSize: "14px",
-                  color: "#333",
-                  backgroundColor: "#fff",
-                  cursor: "pointer",
-                }}
-              >
-                {options.map(({ value, label }, idx) => (
-                  <option key={idx} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
-
-        {/* Información ciudad seleccionada */}
-        {selectedCity && cityData[selectedCity] && (
-          <div style={{ marginTop: "10px" }}>
-            <h3 style={{ color: "#4e342e", fontSize: "22px" }}>{selectedCity}</h3>
-            <img
-              src={cityData[selectedCity].photo}
-              alt={selectedCity}
-              style={{ width: "100%", borderRadius: "12px", marginBottom: "14px" }}
-            />
-            {[
-              ["Temperatura", "temp"],
-              ["Horas de sol", "sunHours"],
-              ["Hoteles", "hotels"],
-              ["Alquileres", "rentals"],
-              ["Salud", "medical"],
-              ["Seguridad", "safety"],
-              ["Costo de vida", "costOfLiving"],
-              ["Calidad de vida", "qualityOfLife"],
-              ["Transporte", "transport"],
-            ].map(([label, key]) => (
-              <p key={key}>
-                <strong>{label}:</strong> {cityData[selectedCity][key]}
-              </p>
-            ))}
-            <p>
-              <strong>Idiomas:</strong> {cityData[selectedCity].languages.join(", ")}
-            </p>
-            <p>
-              <strong>Atracciones:</strong> {cityData[selectedCity].attractions.join(", ")}
-            </p>
-            <p>
-              <strong>Festivales:</strong> {cityData[selectedCity].festivals.join(", ")}
-            </p>
-
-            {/* Tabla comparativa */}
-            {originCity && cityData[originCity] && originCity !== selectedCity && (
+      {(phase === "globe" || phase === "clouds" || phase === "provinces") && (
+        <div className="relative w-full h-screen">
+          {/* Tooltip box */}
+          <div className="absolute top-6 left-6 z-20 bg-gradient-to-br from-purple-200 to-blue-300 rounded-xl p-4 text-gray-900 max-w-xs shadow-lg">
+            {phase === "globe" && (
               <>
-                <hr style={{ margin: "20px 0" }} />
-                <h4 style={{ marginBottom: "10px" }}>
-                  Comparación con <span style={{ color: "#6a1b9a" }}>{originCity}</span>:
-                </h4>
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    fontSize: "14px",
-                  }}
-                >
+                <h2 className="text-xl font-bold mb-1">Explore Countries</h2>
+                <p>Hover to lift a country, click to select</p>
+              </>
+            )}
+            {phase === "clouds" && (
+              <>
+                <h2 className="text-xl font-bold mb-1">Entering {selectedCountry}</h2>
+                <p>Cloud animation and zoom...</p>
+              </>
+            )}
+            {phase === "provinces" && (
+              <>
+                <h2 className="text-xl font-bold mb-1">Provinces of {selectedCountry}</h2>
+                <p>Hover to lift a province, click to select</p>
+              </>
+            )}
+          </div>
+
+          {/* Go back button */}
+          {phase === "provinces" && (
+            <button
+              onClick={goBackToCountries}
+              className="absolute top-6 right-6 z-20 bg-gradient-to-br from-purple-500 to-blue-500 text-white px-4 py-2 rounded-xl shadow-lg font-semibold hover:brightness-110 transition"
+            >
+              ← Back to Countries
+            </button>
+          )}
+
+          {/* Province info card */}
+          {selectedProvince && (
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 bg-white rounded-3xl shadow-xl p-6 w-[360px] max-w-full text-gray-800"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold">{selectedProvince.properties.nombre}</h3>
+                <button onClick={() => setFlipped((f) => !f)}>
+                  <RotateCcw className="w-6 h-6 text-purple-700" />
+                </button>
+              </div>
+
+              {!flipped ? (
+                <ul className="grid grid-cols-2 gap-2 text-sm">
+                  {Object.entries(mockStats).map(([key, val]) => (
+                    <li key={key} className="flex justify-between">
+                      <span className="font-medium capitalize">{key}</span>
+                      <span>{val}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <table className="text-sm w-full border mt-2 border-gray-200">
                   <thead>
-                    <tr style={{ backgroundColor: "#f3e5f5" }}>
-                      <th style={{ border: "1px solid #ddd", padding: "8px" }}></th>
-                      <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                        {selectedCity}
-                      </th>
-                      <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                        {originCity}
-                      </th>
+                    <tr className="bg-gray-100 text-left">
+                      <th className="p-2">Indicator</th>
+                      <th className="p-2">{selectedProvince.properties.nombre}</th>
+                      <th className="p-2">{originCity}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      ["Temperatura", "temp"],
-                      ["Horas de sol", "sunHours"],
-                      ["Costo de vida", "costOfLiving"],
-                      ["Seguridad", "safety"],
-                      ["Transporte", "transport"],
-                    ].map(([label, key]) => (
-                      <tr key={key}>
-                        <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                          <strong>{label}</strong>
-                        </td>
-                        <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                          {cityData[selectedCity][key]}
-                        </td>
-                        <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                          {cityData[originCity][key]}
-                        </td>
+                    {Object.entries(mockStats).map(([key, val], i) => (
+                      <tr key={key} className={i % 2 ? "bg-white" : "bg-gray-50"}>
+                        <td className="p-2 capitalize">{key}</td>
+                        <td className="p-2">{val}</td>
+                        <td className="p-2">{compareStats[key]}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              </>
-            )}
-          </div>
-        )}
-      </div>
+              )}
+            </motion.div>
+          )}
 
-      {/* Globo 3D */}
-      <div
-        style={{
-          flex: 1,
-          width: isMobile ? "100%" : `calc(100vw - 380px)`,
-          height: isMobile ? "50vh" : "100vh",
-          minHeight: isMobile ? "300px" : "auto",
-        }}
-      >
-        <Globe
-          globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-          backgroundColor="#000"
-          showAtmosphere
-          atmosphereColor="lightskyblue"
-          atmosphereAltitude={0.15}
-          pointsData={filteredCities}
-          pointLat={(d) => d.lat}
-          pointLng={(d) => d.lng}
-          pointColor={() => "#ff8000"}
-          pointAltitude={0.01}
-          pointRadius={0.4}
-          onPointClick={(city) => onMarkerClick(city.name)}
-          width={isMobile ? window.innerWidth : window.innerWidth - 380}
-          height={isMobile ? window.innerHeight * 0.5 : window.innerHeight}
-        />
-      </div>
+          <Globe
+            ref={globeEl}
+            globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+            backgroundColor="rgba(0,0,0,0)"
+            polygonsData={
+              phase === "provinces"
+                ? provinces
+                : phase === "clouds" || phase === "globe"
+                ? countries
+                : []
+            }
+            polygonAltitude={(d) =>
+              phase === "provinces"
+                ? d === hoverProvince
+                  ? 0.015
+                  : 0.008
+                : d === hoverD
+                ? 0.025
+                : 0.01
+            }
+            polygonCapColor={(d) =>
+              d === (phase === "provinces" ? hoverProvince : hoverD)
+                ? "#66bb6a"
+                : "#388e3c"
+            }
+            polygonSideColor={() => "rgba(34, 139, 34, 0.2)"}
+            polygonStrokeColor={() => "#444"}
+            polygonStrokeWidth={0.4}
+            polygonsTransitionDuration={300}
+            onPolygonHover={phase === "provinces" ? setHoverProvince : setHoverD}
+            onPolygonClick={(d) => {
+              if (phase === "globe") {
+                onCountryClick(d);
+              } else if (phase === "provinces") {
+                setSelectedProvince(d);
+                setFlipped(false);
+              }
+            }}
+            polygonsFilter={() => true}
+            enableRotate={false}
+            enablePan={false}
+            enableZoom={true}
+          />
+
+          <AnimatePresence>
+            {phase === "clouds" && (
+              <motion.div
+                key="clouds"
+                className="absolute inset-0 bg-white bg-opacity-20 backdrop-blur-sm pointer-events-none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 2 }}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
-
