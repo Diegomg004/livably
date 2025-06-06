@@ -321,6 +321,7 @@ export default function App() {
           <Globe
             ref={globeEl}
             globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+            backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
             backgroundColor="rgba(0,0,0,0)"
             polygonsData={
               phase === "provinces"
