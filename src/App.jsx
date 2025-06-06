@@ -136,10 +136,11 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen w-full transition-colors duration-700 ${phase === "intro"
-        ? "bg-gradient-to-br from-purple-200 to-blue-300 p-6 flex items-center justify-center"
-        : "bg-gray-900"
-        }`}
+      className={`min-h-screen w-full transition-colors duration-700 ${
+        phase === "intro"
+          ? "bg-gradient-to-br from-purple-200 to-blue-300 p-6 flex items-center justify-center"
+          : "bg-gray-900"
+      }`}
     >
       {phase === "intro" && (
         <motion.div
@@ -168,8 +169,9 @@ export default function App() {
           <button
             onClick={startExploring}
             disabled={!originCity}
-            className={`w-full py-4 rounded-xl text-white font-semibold transition ${originCity ? "bg-purple-700 hover:bg-purple-800" : "bg-purple-300 cursor-not-allowed"
-              }`}
+            className={`w-full py-4 rounded-xl text-white font-semibold transition ${
+              originCity ? "bg-purple-700 hover:bg-purple-800" : "bg-purple-300 cursor-not-allowed"
+            }`}
           >
             Start
           </button>
@@ -216,7 +218,7 @@ export default function App() {
               layout
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute bottom-4 left-4 right-4 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 z-30 bg-white rounded-3xl shadow-xl p-4 sm:p-6 max-w-md text-gray-800"
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 bg-white rounded-3xl shadow-xl p-6 w-[360px] max-w-full text-gray-800"
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-2xl font-bold">{selectedProvince.properties.nombre}</h3>
@@ -226,35 +228,33 @@ export default function App() {
               </div>
 
               {!flipped ? (
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                <ul className="grid grid-cols-2 gap-2 text-sm">
                   {Object.entries(mockStats).map(([key, val]) => (
                     <li key={key} className="flex justify-between">
                       <span className="font-medium capitalize">{key}</span>
-                      <span className="text-right">{val}</span>
+                      <span>{val}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <div className="overflow-x-auto -mx-2">
-                  <table className="text-sm w-full min-w-[480px] border mt-2 border-gray-200 mx-2">
-                    <thead>
-                      <tr className="bg-gray-100 text-left">
-                        <th className="p-2">Indicator</th>
-                        <th className="p-2">{selectedProvince.properties.nombre}</th>
-                        <th className="p-2">{originCity}</th>
+                <table className="text-sm w-full border mt-2 border-gray-200">
+                  <thead>
+                    <tr className="bg-gray-100 text-left">
+                      <th className="p-2">Indicator</th>
+                      <th className="p-2">{selectedProvince.properties.nombre}</th>
+                      <th className="p-2">{originCity}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(mockStats).map(([key, val], i) => (
+                      <tr key={key} className={i % 2 ? "bg-white" : "bg-gray-50"}>
+                        <td className="p-2 capitalize">{key}</td>
+                        <td className="p-2">{val}</td>
+                        <td className="p-2">{compareStats[key]}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(mockStats).map(([key, val], i) => (
-                        <tr key={key} className={i % 2 ? "bg-white" : "bg-gray-50"}>
-                          <td className="p-2 capitalize">{key}</td>
-                          <td className="p-2">{val}</td>
-                          <td className="p-2">{compareStats[key]}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </motion.div>
           )}
@@ -267,8 +267,8 @@ export default function App() {
               phase === "provinces"
                 ? provinces
                 : phase === "clouds" || phase === "globe"
-                  ? countries
-                  : []
+                ? countries
+                : []
             }
             polygonAltitude={(d) =>
               phase === "provinces"
@@ -276,8 +276,8 @@ export default function App() {
                   ? 0.015
                   : 0.008
                 : d === hoverD
-                  ? 0.025
-                  : 0.01
+                ? 0.025
+                : 0.01
             }
             polygonCapColor={(d) =>
               d === (phase === "provinces" ? hoverProvince : hoverD)
