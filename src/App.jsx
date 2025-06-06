@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Globe from "react-globe.gl";
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, X } from "lucide-react";
 
 const cities = [
   { name: "Madrid" },
@@ -71,7 +71,9 @@ export default function App() {
   const globeEl = useRef();
 
   useEffect(() => {
-    fetch("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
+    fetch(
+      "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"
+    )
       .then((res) => res.json())
       .then((data) => setCountries(data.features));
   }, []);
@@ -89,7 +91,11 @@ export default function App() {
         ...f,
         properties: {
           ...f.properties,
-          nombre: f.properties.NAME_2 || f.properties.name || f.properties.state_name || "Unnamed",
+          nombre:
+            f.properties.NAME_2 ||
+            f.properties.name ||
+            f.properties.state_name ||
+            "Unnamed",
         },
       }));
       setProvinces(featuresWithNombre);
@@ -118,7 +124,9 @@ export default function App() {
 
   useEffect(() => {
     if (phase === "clouds" && selectedCountry) {
-      const country = countries.find((c) => c.properties.name === selectedCountry);
+      const country = countries.find(
+        (c) => c.properties.name === selectedCountry
+      );
       if (!country) return;
 
       const coordinates = country.geometry.coordinates.flat(Infinity);
@@ -151,7 +159,9 @@ export default function App() {
           <h1 className="text-5xl font-extrabold text-purple-800 mb-6 drop-shadow-md">
             LIVABLY
           </h1>
-          <p className="text-gray-700 mb-8 text-lg">Choose your origin city to start your journey</p>
+          <p className="text-gray-700 mb-8 text-lg">
+            Choose your origin city to start your journey
+          </p>
           <select
             className="w-full p-4 rounded-xl border border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-600 text-lg mb-8"
             value={originCity}
@@ -170,7 +180,9 @@ export default function App() {
             onClick={startExploring}
             disabled={!originCity}
             className={`w-full py-4 rounded-xl text-white font-semibold transition ${
-              originCity ? "bg-purple-700 hover:bg-purple-800" : "bg-purple-300 cursor-not-allowed"
+              originCity
+                ? "bg-purple-700 hover:bg-purple-800"
+                : "bg-purple-300 cursor-not-allowed"
             }`}
           >
             Start
@@ -190,13 +202,17 @@ export default function App() {
             )}
             {phase === "clouds" && (
               <>
-                <h2 className="text-xl font-bold mb-1">Entering {selectedCountry}</h2>
+                <h2 className="text-xl font-bold mb-1">
+                  Entering {selectedCountry}
+                </h2>
                 <p>Cloud animation and zoom...</p>
               </>
             )}
             {phase === "provinces" && (
               <>
-                <h2 className="text-xl font-bold mb-1">Provinces of {selectedCountry}</h2>
+                <h2 className="text-xl font-bold mb-1">
+                  Provinces of {selectedCountry}
+                </h2>
                 <p>Hover to lift a province, click to select</p>
               </>
             )}
@@ -212,52 +228,95 @@ export default function App() {
             </button>
           )}
 
-          {/* Province info card */}
-          {selectedProvince && (
-            <motion.div
-              layout
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 bg-white rounded-3xl shadow-xl p-6 w-[360px] max-w-full text-gray-800"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-2xl font-bold">{selectedProvince.properties.nombre}</h3>
-                <button onClick={() => setFlipped((f) => !f)}>
-                  <RotateCcw className="w-6 h-6 text-purple-700" />
-                </button>
-              </div>
+          {/* Bottom Sheet info panel */}
+          <AnimatePresence>
+            {selectedProvince && (
+              <>
+                {/* Overlay */}
+                <motion.div
+                  key="overlay"
+                  className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setSelectedProvince(null)}
+                />
 
-              {!flipped ? (
-                <ul className="grid grid-cols-2 gap-2 text-sm">
-                  {Object.entries(mockStats).map(([key, val]) => (
-                    <li key={key} className="flex justify-between">
-                      <span className="font-medium capitalize">{key}</span>
-                      <span>{val}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <table className="text-sm w-full border mt-2 border-gray-200">
-                  <thead>
-                    <tr className="bg-gray-100 text-left">
-                      <th className="p-2">Indicator</th>
-                      <th className="p-2">{selectedProvince.properties.nombre}</th>
-                      <th className="p-2">{originCity}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(mockStats).map(([key, val], i) => (
-                      <tr key={key} className={i % 2 ? "bg-white" : "bg-gray-50"}>
-                        <td className="p-2 capitalize">{key}</td>
-                        <td className="p-2">{val}</td>
-                        <td className="p-2">{compareStats[key]}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </motion.div>
-          )}
+                {/* Bottom Sheet */}
+                <motion.div
+                  key="bottom-sheet"
+                  className="fixed bottom-0 left-0 right-0 max-h-[90vh] md:max-h-[70vh] bg-white rounded-t-3xl shadow-xl z-50 p-6 md:max-w-xl md:left-1/2 md:-translate-x-1/2 overflow-y-auto"
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "100%" }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      {selectedProvince.properties.nombre}
+                    </h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setFlipped((f) => !f)}
+                        aria-label="Flip card"
+                        className="p-2 rounded-full hover:bg-gray-100 transition"
+                      >
+                        <RotateCcw className="w-6 h-6 text-gray-700" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedProvince(null);
+                          setFlipped(false);
+                        }}
+                        aria-label="Close panel"
+                        className="p-2 rounded-full hover:bg-gray-100 transition"
+                      >
+                        <X className="w-6 h-6 text-gray-700" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {!flipped ? (
+                    <div className="grid grid-cols-2 gap-4 text-gray-700">
+                      {Object.entries(mockStats).map(([key, val]) => (
+                        <div key={key} className="flex flex-col">
+                          <span className="font-semibold capitalize">
+                            {key.replace(/([A-Z])/g, " $1")}
+                          </span>
+                          <span>{val}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <table className="w-full text-gray-700 border-collapse border border-gray-300">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border border-gray-300 p-2">Metric</th>
+                          <th className="border border-gray-300 p-2">
+                            {selectedProvince.properties.nombre}
+                          </th>
+                          <th className="border border-gray-300 p-2">{originCity}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.keys(mockStats).map((key) => (
+                          <tr key={key} className="even:bg-gray-50">
+                            <td className="border border-gray-300 p-2 capitalize">
+                              {key.replace(/([A-Z])/g, " $1")}
+                            </td>
+                            <td className="border border-gray-300 p-2">{mockStats[key]}</td>
+                            <td className="border border-gray-300 p-2">
+                              {compareStats[key]}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
           <Globe
             ref={globeEl}
