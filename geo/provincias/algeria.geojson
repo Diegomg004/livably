@@ -8,7 +8,7 @@
         }
     },
     "features": [
-        {
+        { 
             "type": "Feature",
             "properties": {
                 "GID_1": "DZA.1_1",
